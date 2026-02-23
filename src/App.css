@@ -1,0 +1,127 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #0f172a;
+  color: white;
+}
+
+.dashboard {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.status {
+  background: #1e293b;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.dot {
+  height: 8px;
+  width: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.panel {
+  background: #1e293b;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.incident-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #0f172a;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.incident-card.active {
+  outline: 1px solid #38bdf8;
+}
+
+.incident-title {
+  font-size: 14px;
+}
+
+.incident-time {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.severity {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.severity.high {
+  background: #dc2626;
+}
+
+.severity.medium {
+  background: #f59e0b;
+}
+
+.severity.low {
+  background: #22c55e;
+}
+
+.analysis-box {
+  background: #0f172a;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.confidence-bar {
+  height: 8px;
+  background: #0f172a;
+  border-radius: 10px;
+  margin-top: 6px;
+}
+
+.confidence-fill {
+  width: 75%;
+  height: 100%;
+  background: #38bdf8;
+  border-radius: 10px;
+}
+
+.recommendation-card {
+  background: #0f172a;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.metrics-grid {
+  display: flex;
+  gap: 16px;
+}
+
+.metric {
+  background: #0f172a;
+  padding: 12px;
+  border-radius: 8px;
+  flex: 1;
+}
