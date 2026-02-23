@@ -1,3 +1,3 @@
 # NIRIQ
 
-I making this project a part of Amazon Nova AI Hackathon
+I am making this project a part of Amazon Nova AI Hackathon
