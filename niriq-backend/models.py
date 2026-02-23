@@ -1,10 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Literal
 
-class Event (BaseModel):
+class Event(BaseModel):
     source: str
-    type: str
-    name : Optional[str]
-    value : Optional[float]
-    message : Optional [str]
-    timestamp : str
+    type: Literal["metric", "log"]
+    name: str
+    value: float
+    timestamp: str

@@ -1,11 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const mockIncidents = [
-  { id: "INC-1024", title: "Payment Service Deployment Failed", severity: "HIGH", service: "payment-service", time: "2 mins ago" },
-  { id: "INC-1025", title: "API Latency Spike Detected", severity: "MEDIUM", service: "gateway-service", time: "5 mins ago" },
-  { id: "INC-1026", title: "Database Connection Exhausted", severity: "CRITICAL", service: "db-service", time: "10 mins ago" },
-  { id: "INC-1027", title: "Authentication Failure Rate Increased", severity: "LOW", service: "auth-service", time: "18 mins ago" }
-];
 
 const mockTimeline = [
   { time: "12:01", event: "Deployment pipeline triggered" },
@@ -59,7 +53,30 @@ function ActivityStatus({ status }) {
 }
 
 export default function Dashboard() {
-  const [selectedIncident, setSelectedIncident] = useState(mockIncidents[0]);
+
+  const [incidents, setIncidents] = useState([]);
+  const [selectedIncident, setSelectedIncident] = useState(null);
+
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const res = await fetch("http://localhost:8000/incidents");
+      const data = await res.json();
+      setIncidents(data);
+      if (data.length > 0) setSelectedIncident(data[0]);
+    }, 3000);
+    return () => clearInterval(interval)
+  }, []);   
+  if (!selectedIncident) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white p-6">
+        <h1 className="text-2xl font-semibold">NIRIQ Monitoring Console</h1>
+        <p className="text-slate-400 text-sm">
+          Waiting for incidents from connected systems…
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-6">
@@ -74,15 +91,14 @@ export default function Dashboard() {
           <h2 className="text-sm font-medium mb-4 text-slate-300">Active Incidents</h2>
 
           <div className="space-y-2">
-            {mockIncidents.map((incident) => (
+            {incidents.map((incident) => (
               <div
                 key={incident.id}
                 onClick={() => setSelectedIncident(incident)}
-                className={`p-3 rounded-xl cursor-pointer transition-all border ${
-                  selectedIncident.id === incident.id
+                className={`p-3 rounded-xl cursor-pointer transition-all border ${selectedIncident.id === incident.id
                     ? "bg-slate-800 border-slate-700"
                     : "bg-slate-900 border-slate-800 hover:bg-slate-800"
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-xs text-slate-400">{incident.id}</span>
