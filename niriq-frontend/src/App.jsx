@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from "react";
 
 
-const mockTimeline = [
-  { time: "12:01", event: "Deployment pipeline triggered" },
-  { time: "12:03", event: "Container initialization started" },
-  { time: "12:04", event: "Null reference exception detected" },
-  { time: "12:05", event: "Health checks failing" },
-  { time: "12:06", event: "Incident auto-created" }
-];
+// const mockTimeline = [
+//   { time: "12:01", event: "Deployment pipeline triggered" },
+//   { time: "12:03", event: "Container initialization started" },
+//   { time: "12:04", event: "Null reference exception detected" },
+//   { time: "12:05", event: "Health checks failing" },
+//   { time: "12:06", event: "Incident auto-created" }
+// ];
 
-const mockAIActivity = [
-  { id: 1, action: "Analyzing logs", status: "COMPLETED" },
-  { id: 2, action: "Correlating metrics", status: "COMPLETED" },
-  { id: 3, action: "Identifying probable cause", status: "COMPLETED" },
-  { id: 4, action: "Generating remediation steps", status: "IN_PROGRESS" }
-];
+// const mockAIActivity = [
+//   { id: 1, action: "Analyzing logs", status: "COMPLETED" },
+//   { id: 2, action: "Correlating metrics", status: "COMPLETED" },
+//   { id: 3, action: "Identifying probable cause", status: "COMPLETED" },
+//   { id: 4, action: "Generating remediation steps", status: "IN_PROGRESS" }
+// ];
 
-const mockAnalysis = {
-  predictedCategory: "Deployment Failure",
-  predictedSeverity: "HIGH",
-  confidence: 0.92,
-  probableCause: "Null reference during container initialization",
-  suggestedActions: [
-    "Check recent code changes",
-    "Validate dependency injection config",
-    "Rollback latest deployment if needed"
-  ]
-};
+// const mockAnalysis = {
+//   predictedCategory: "Deployment Failure",
+//   predictedSeverity: "HIGH",
+//   confidence: 0.92,
+//   probableCause: "Null reference during container initialization",
+//   suggestedActions: [
+//     "Check recent code changes",
+//     "Validate dependency injection config",
+//     "Rollback latest deployment if needed"
+//   ]
+// };
 
 function SeverityBadge({ severity }) {
   const styles = {
@@ -59,27 +59,65 @@ export default function Dashboard() {
 
   const [incidents, setIncidents] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const[error, setError] = useState(null);
 
+// <---------------fetching Incident Details------------>  
 
-  useEffect(() => {
-    const interval = setInterval(async () => {
+useEffect(() => {
+  const fetchIncidents = async () => {
+    try {
       const res = await fetch("http://localhost:8000/incidents");
+      if( !res.ok) throw new Error("Failed to fetch incidents");
+
       const data = await res.json();
       setIncidents(data);
-      if (data.length > 0) setSelectedIncident(data[0]);
-    }, 3000);
-    return () => clearInterval(interval)
-  }, []);   
-  if (!selectedIncident) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-white p-6">
-        <h1 className="text-2xl font-semibold">NIRIQ Monitoring Console</h1>
-        <p className="text-slate-400 text-sm">
-          Waiting for incidents from connected systems…
-        </p>
-      </div>
-    );
-  }
+
+      if(data.length > 0 && !selectedIncident) {
+        setSelectedIncident(data[0]);
+      }
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+  fetchIncidents();
+  const interval = setInterval(fetchIncidents, 3000);
+
+  return() => clearInterval(interval);
+}, [selectedIncident]);
+
+// <------------------States-------------->
+
+if (loading) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-white p-6">
+       <h1 className="text-2xl font-semibold">NIRIQ Monitoring Console</h1>
+        <p className="text-slate-400 text-sm">Initializing incidnt stream.....</p>
+    </div>
+  );
+}
+
+if(error) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-white p-6">
+       <h1 className="text-2xl font-semibold">NIRIQ Monitoring Console</h1>
+        <p className="text-slate-400 text-sm">Error: {error}</p>
+    </div>
+  );
+}
+
+if(!selectedIncident) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-white p-6">
+       <h1 className="text-2xl font-semibold">NIRIQ Monitoring Console</h1>
+        <p className="text-slate-400 text-sm">Waiting for Incidents from conected systems.....</p>
+    </div>
+  );
+}
+
+// <-------main UI-------------->  
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-6">
@@ -143,7 +181,7 @@ export default function Dashboard() {
               <div className="col-span-9">
                 <p className="text-slate-400 text-xs mb-2">Event Timeline</p>
                 <div className="bg-slate-950 rounded-xl p-3 space-y-2">
-                  {mockTimeline.map((item, i) => (
+                  {(selectedIncident.timeline || []).map((item,  i) => (
                     <div key={i} className="flex text-xs">
                       <span className="text-slate-500 w-12">{item.time}</span>
                       <span className="text-slate-300">{item.event}</span>
@@ -163,7 +201,7 @@ export default function Dashboard() {
               <div className="space-y-3 text-sm">
                 <div>
                   <p className="text-slate-400 text-xs">Probable Cause</p>
-                  <p>{mockAnalysis.probableCause}</p>
+                  <p>{selectedIncident.analysis?.probableCause}</p>
                 </div>
 
                 <div>
@@ -171,7 +209,7 @@ export default function Dashboard() {
                   <div className="w-full bg-slate-800 rounded-full h-2 mt-1">
                     <div
                       className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${mockAnalysis.confidence * 100}%` }}
+                      style={{ width: `${(selectedIncident.analysis?.confidence || 0) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -179,7 +217,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-slate-400 text-xs">Suggested Actions</p>
                   <ul className="list-disc list-inside text-slate-300 text-xs space-y-1">
-                    {mockAnalysis.suggestedActions.map((action, i) => (
+                    {(selectedIncident.analysis?.suggestedActions || []).map((action, i) => (
                       <li key={i}>{action}</li>
                     ))}
                   </ul>
@@ -192,8 +230,9 @@ export default function Dashboard() {
               <h2 className="text-sm font-medium mb-3 text-slate-300">AI Activity Feed</h2>
 
               <div className="space-y-2">
-                {mockAIActivity.map((item) => (
-                  <div key={item.id} className="flex justify-between text-xs bg-slate-950 p-2 rounded-lg">
+                {(selectedIncident.agent_activty || []).map((item, i) => (
+                  <div key={i} 
+                  className="flex justify-between text-xs bg-slate-950 p-2 rounded-lg">
                     <span className="text-slate-300">{item.action}</span>
                     <ActivityStatus status={item.status} />
                   </div>
