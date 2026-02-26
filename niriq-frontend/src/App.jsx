@@ -37,7 +37,7 @@ function SeverityBadge({ severity }) {
   };
 
   return (
-    <span className={`px-2 py-1 rounded text-xs font-medium ${styles[severity]}`}>
+    <span className={`px-2 py-1 rounded text-xs font-medium ${styles[severity] || ""}`}>
       {severity}
     </span>
   );
@@ -46,11 +46,14 @@ function SeverityBadge({ severity }) {
 function ActivityStatus({ status }) {
   const styles = {
     COMPLETED: "text-green-400",
-    IN_PROGRESS: "text-blue-400"
+    IN_PROGRESS: "text-blue-400",
+    FAILED: "text-red-400"
   };
 
-  return <span className={`text-xs ${styles[status]}`}>{status}</span>;
+  return <span className={`text-xs ${styles[status] || ""}`}>{status}</span>;
 }
+
+// <-----------------Main Dashboard----------------->
 
 export default function Dashboard() {
 
